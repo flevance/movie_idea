@@ -53,7 +53,7 @@ public class FilmController extends BaseController {
     @RequestMapping(value = "/picture/film/{filmName}" ,method = RequestMethod.GET)
     public void showFilmPic(@PathVariable String filmName, HttpServletResponse response){
         response.setContentType("image/png");
-        URL systemResource = ClassLoader.getSystemResource("static");
+        URL systemResource = ClassLoader.getSystemResource("application.properties");
         System.out.println("?????????????????" + systemResource);
         String url = systemResource.getPath();
         ///Users/liu/Java_Study/spider/temp
