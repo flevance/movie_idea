@@ -53,9 +53,11 @@ public class FilmController extends BaseController {
     @RequestMapping(value = "/picture/film/{filmName}" ,method = RequestMethod.GET)
     public void showFilmPic(@PathVariable String filmName, HttpServletResponse response){
         response.setContentType("image/png");
-        URL systemResource = ClassLoader.getSystemResource("application.properties");
-        System.out.println("?????????????????" + systemResource);
-        String url = systemResource.getPath();
+        URL resource = FilmController.class.getClassLoader().getResource("static");
+
+        //URL systemResource = ClassLoader.getSystemResource("application.properties");
+        System.out.println("?????????????????" + resource);
+        String url = resource.getPath();
         ///Users/liu/Java_Study/spider/temp
         try (FileInputStream fis = new FileInputStream(url  + "/images/picture/film/" + filmName);
              OutputStream os = response.getOutputStream()) {
