@@ -54,6 +54,7 @@ public class FilmController extends BaseController {
     public void showFilmPic(@PathVariable String filmName, HttpServletResponse response){
         response.setContentType("image/png");
         URL systemResource = ClassLoader.getSystemResource("static");
+        System.out.println("?????????????????" + systemResource);
         String url = systemResource.getPath();
         ///Users/liu/Java_Study/spider/temp
         try (FileInputStream fis = new FileInputStream(url  + "/images/picture/film/" + filmName);
