@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>选座购票</title>
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+
+    <style>
+        .el-row {
+            margin-bottom: 20px;
+        &:last-child {
+             margin-bottom: 0;
+         }
+        }
+        .el-col {
+            border-radius: 4px;
+        }
+        .bg-purple-dark {
+            background: #99a9bf;
+        }
+        .bg-purple {
+            background: #d3dce6;
+        }
+        .bg-purple-light {
+            background: #e5e9f2;
+        }
+        .grid-content {
+            border-radius: 4px;
+            min-height: 36px;
+        }
+        .row-bg {
+            padding: 10px 0;
+            background-color: #f9fafc;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="app">
+        <el-row>
+            <el-col :span="16">
+                <el-row>
+                    <el-col :span="24">
+                        <div class="grid-content">
+                            <div class="grid-contente" style="margin-left: 500px;height: 100px">
+                                <img src="/images/screen.png">
+                            </div>
+                            <br>
+                        </div>
+                    </el-col>
+                    <el-col :span="24">
+                        <div class="grid-content" style="margin-left: 570px">银幕中央</div>
+                    </el-col>
+                    <div style="width: 600px;height: 600px;margin-left: 330px">
+                        <el-col :span="3" v-for="seat in seats">
+                            <div class="grid-content"><img :src="seat.imgUrl" style="height: 30px ; width: 30px" @click="chooseSeatHandler(seat.id)"></div>
+                        </el-col>
+                    </div>
+
+                </el-row>
+            </el-col>
+            <el-col :span="8">
+                <div class="grid-content bg-purple-light">
+                    <el-row>
+                        <el-col :span="6">
+                            <div class="grid-content">
+                                <div class="grid-conten">
+                                    <img :src="'/picture/film/' + film.filmPic" style="width: 120px ;height: 180px" >
+                                </div>
+                            </div>
+                        </el-col>
+                        <el-col :span="18">
+                            <div class="grid-content">
+                                <el-row>
+                                    <el-col :span="24"><div class="grid-content">{{film.filmName}}</div></el-col>
+                                    <el-col :span="24"><div class="grid-content">{{film.filmType}}</div></el-col>
+                                    <el-col :span="24"><div class="grid-content">{{film.filmTime}}</div></el-col>
+                                </el-row>
+                            </div>
+                        </el-col>
+                    </el-row>
+                    <el-row>
+                        <el-col :span="4"><div class="grid-content">影院:</div></el-col>
+                        <el-col :span="20"><div class="grid-content">{{cinema.cinemaName}}</div></el-col>
+                        <el-col :span="4"><div class="grid-content">影厅:</div></el-col>
+                        <el-col :span="20"><div class="grid-content">{{filmSchedule.hall}}</div></el-col>
+                        <el-col :span="4"><div class="grid-content">版本:</div></el-col>
+                        <el-col :span="20"><div class="grid-content">{{filmSchedule.filmLanguage}}</div></el-col>
+                        <el-col :span="4"><div class="grid-content">场次:</div></el-col>
+                        <el-col :span="20"><div class="grid-content">{{filmSchedule.showTime}}</div></el-col>
+                        <el-col :span="4"><div class="grid-content">座位:</div></el-col>
+                        <el-col :span="20">
+                            <div class="grid-content">
+                                <el-tag
+                                        v-for="seatId in alreadyChooseSeatIds"
+                                        @close="chooseSeatHandler(seatId)"
+                                        closable>
+                                    {{seatId.split('-')[0] + '排' + seatId.split('-')[1] + '座'}}
+                                </el-tag>
+                            </div>
+                        </el-col>
+                        <el-col :span="4"><div class="grid-content">票价:</div></el-col>
+                        <el-col :span="20"><div class="grid-content">￥{{(filmSchedule.price * alreadyChooseSeatIds.length).toFixed(2)}}</div></el-col>
+                        <el-col :span="24"><div class="grid-content"><el-button type="danger" round @click="toSettlement">确认选座</el-button></div></el-col>
+                    </el-row>
+                </div>
+            </el-col>
+        </el-row>
+
+
+    </div>
+
+</body>
+    <script>
+        new Vue({
+            el : "#app",
+            data : {
+                filmScheduleId : [[${filmScheduleId}]],
+                film : {},
+                cinema : {},
+                filmSchedule : {},
+                seats : [],
+                alreadyChooseSeatIds : [],
+                alreadyOrderSeat : []
+            },
+            created : function(){
+                this.selectFilmCinemaByFilmScheduleId();
+                this.showAlreadyOrderSeats();
+            },
+            methods : {
+                selectFilmCinemaByFilmScheduleId : function(){
+                    var that = this;
+                    axios.get("/film/selectFilmCinemaByFilmScheduleId/" + that.filmScheduleId).then(function(response){
+                        that.film = response.data.data[0];
+                        that.cinema = response.data.data[1];
+                        that.filmSchedule = response.data.data[2];
+                    })
+                },
+                creatSeats : function () {
+                    for (var i = 1;i <= 8;i++ ){
+                        for (var j = 1; j <= 8;j++){
+                            var imgUrlValue = '/images/emptySeat.png';
+                            if (this.cheakBuyTicket(i,j)) {
+                                imgUrlValue = '/images/soldSeat.png';
+                            }
+                            var seat = {
+                                row : i,
+                                col : j,
+                                imgUrl : imgUrlValue,
+                                id : i + "-" + j
+                            };
+                            this.seats.push(seat);
+                        }
+                    }
+                },
+                chooseSeatHandler : function (seatId) {
+                    var row = seatId.split("-")[0];
+                    var col = seatId.split("-")[1];
+                    if (this.cheakBuyTicket(row,col)){
+                        return;
+                    }
+                    
+
+                    var seat;
+                    if (this.alreadyChooseSeatIds.indexOf(seatId) != -1){
+                        seat = this.getTargetSeat(seatId);
+                        seat.imgUrl="/images/emptySeat.png";
+                        this.removeSeatHandler(seatId);
+                        return;
+                    }
+                    seat = this.getTargetSeat(seatId);
+                    seat.imgUrl="/images/selectSeat.png";
+                    this.alreadyChooseSeatIds.push(seatId);
+                },
+                getTargetSeat : function (seatId) {
+                    for (var i = 0;i<this.seats.length;i++){
+                        if (seatId == this.seats[i].id){
+                            return this.seats[i];
+                        }
+                    }
+
+                },
+                removeSeatHandler : function (seatId) {
+                    for (var i = 0;i< this.alreadyChooseSeatIds.length;i++){
+                        if (seatId == this.alreadyChooseSeatIds[i]){
+                            this.alreadyChooseSeatIds.splice(i,1);
+                        }
+                    }
+                },
+                toSettlement : function () {
+                    var f = "/film/toSettlement/" + this.film.filmCode + "/" + this.cinema.cinemaCode + "/" + this.filmScheduleId + "?chooseSeats=" + this.alreadyChooseSeatIds;
+                    window.location.href = f;
+                },
+                showAlreadyOrderSeats : function () {
+                    var that = this;
+                    axios.get("/film/alreadyOrderSeats/"+ that.filmScheduleId).then(function(response){
+                        that.alreadyOrderSeat = response.data.data;
+                        that.creatSeats();
+                    })
+                },
+                cheakBuyTicket : function (row,col) {
+                    for (var i = 0;i< this.alreadyOrderSeat.length;i++) {
+                        if (this.alreadyOrderSeat[i].seatRow == row && this.alreadyOrderSeat[i].seatCol == col){
+                            return true;
+                        }
+
+                    }
+                    return false;
+                }
+            }
+        })
+    </script>
+
+</html>

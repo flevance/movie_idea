@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dayuanit.movie.movie.mapper.OrderInfoMapper">
+  <resultMap id="BaseResultMap" type="com.dayuanit.movie.movie.entity.OrderInfo">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="order_id" jdbcType="INTEGER" property="orderId" />
+    <result column="seat_col" jdbcType="INTEGER" property="seatCol" />
+    <result column="seat_row" jdbcType="INTEGER" property="seatRow" />
+    <result column="price" jdbcType="VARCHAR" property="price" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, order_id, seat_col, seat_row, price
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from spider_order_info
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from spider_order_info
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.dayuanit.movie.movie.entity.OrderInfo">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into spider_order_info (order_id, seat_col, seat_row, 
+      price)
+    values (#{orderId,jdbcType=INTEGER}, #{seatCol,jdbcType=INTEGER}, #{seatRow,jdbcType=INTEGER}, 
+      #{price,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.dayuanit.movie.movie.entity.OrderInfo">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into spider_order_info
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="orderId != null">
+        order_id,
+      </if>
+      <if test="seatCol != null">
+        seat_col,
+      </if>
+      <if test="seatRow != null">
+        seat_row,
+      </if>
+      <if test="price != null">
+        price,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="orderId != null">
+        #{orderId,jdbcType=INTEGER},
+      </if>
+      <if test="seatCol != null">
+        #{seatCol,jdbcType=INTEGER},
+      </if>
+      <if test="seatRow != null">
+        #{seatRow,jdbcType=INTEGER},
+      </if>
+      <if test="price != null">
+        #{price,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.dayuanit.movie.movie.entity.OrderInfo">
+    update spider_order_info
+    <set>
+      <if test="orderId != null">
+        order_id = #{orderId,jdbcType=INTEGER},
+      </if>
+      <if test="seatCol != null">
+        seat_col = #{seatCol,jdbcType=INTEGER},
+      </if>
+      <if test="seatRow != null">
+        seat_row = #{seatRow,jdbcType=INTEGER},
+      </if>
+      <if test="price != null">
+        price = #{price,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.dayuanit.movie.movie.entity.OrderInfo">
+    update spider_order_info
+    set order_id = #{orderId,jdbcType=INTEGER},
+      seat_col = #{seatCol,jdbcType=INTEGER},
+      seat_row = #{seatRow,jdbcType=INTEGER},
+      price = #{price,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <select id="selectByOrderId" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List"/>
+    from spider_order_info
+    where order_id = #{orderId}
+  </select>
+
+  <select id="selectByFilmScheduleId" resultMap="BaseResultMap">
+    select soi.id,soi.seat_col,soi.order_id,soi.price,soi.seat_row
+    from spider.spider_order so,spider.spider_order_info soi
+    where so.id = soi.order_id and so.film_schedule_id = #{filmScheduleId}
+  </select>
+
+  <select id="loadAlreadyBuySeat" resultMap="BaseResultMap">
+    select soi.id,soi.seat_col,soi.order_id,soi.price,soi.seat_row
+    from spider.spider_order so,spider.spider_order_info soi
+    where so.id = soi.order_id and so.film_schedule_id = #{filmScheduleId}
+    and soi.seat_row = #{row} and soi.seat_col = #{col}
+  </select>
+</mapper>

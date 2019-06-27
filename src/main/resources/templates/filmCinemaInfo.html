@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:v-on="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>购票页面</title>
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+
+    <style>
+        .el-row {
+            margin-bottom: 20px;
+        &:last-child {
+             margin-bottom: 0;
+         }
+        }
+        .el-col {
+            border-radius: 4px;
+        }
+        .bg-purple-dark {
+            background: #99a9bf;
+        }
+        .bg-purple {
+            background: #d3dce6;
+        }
+        .bg-purple-light {
+            background: #e5e9f2;
+        }
+        .grid-content {
+            border-radius: 4px;
+            min-height: 36px;
+        }
+        .row-bg {
+            padding: 10px 0;
+            background-color: #f9fafc;
+        }
+
+
+
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div>
+        <el-row>
+            <div>
+                <el-col :span="4">
+                    <div class="grid-conten">
+                        <img :src="'/picture/film/' + film.filmPic" style="width: 200px ;height: 300px" >
+                    </div>
+                </el-col>
+                <el-col :span="6">
+                    <el-row>
+                        <el-col :span="6"><div class="grid-content">{{film.filmName}}</div></el-col>
+                    </el-row>
+                    <el-row>
+                        <el-col :span="6"><div class="grid-content">{{film.filmType}}</div></el-col>
+                    </el-row>
+                    <el-row>
+                        <el-col :span="6"><div class="grid-content">{{film.filmTime}}</div></el-col>
+                    </el-row>
+                    <el-row>
+                        <el-col :span="6"><div class="grid-content">{{film.filmShowTime}}</div></el-col>
+                    </el-row>
+                </el-col>
+            </div>
+        </el-row>
+    </div>
+    <el-divider></el-divider>
+    <div>
+        <el-row>
+            <el-col :span="2">
+                <div class="grid-content">
+                    <span style="color: black">行政区域</span>
+                </div>
+            </el-col>
+            <div>
+                <el-col :span="1">
+                    <div class="grid-content">
+                        <el-link type="success" v-on:click="listCinema4Area(-1)">全部</el-link>
+                    </div>
+                </el-col>
+            </div>
+            <div v-for="area in areas">
+                <el-col :span="1">
+                    <div class="grid-content">
+                        <el-link type="success" v-on:click="listCinema4Area(area.areaId)">{{area.areaName}}</el-link>
+                    </div>
+                </el-col>
+            </div>
+        </el-row>
+    </div>
+    <div>
+        <el-card class="box-card">
+            <div slot="header" class="clearfix">
+                <span>影院列表</span>
+            </div>
+            <el-row v-for="cinema in cinema4Areas">
+                <div>
+                    <el-divider></el-divider>
+                    <el-col :span="20"><div class="grid-content">{{cinema.cinemaName}}<br><span style="color: #99a9bf">{{cinema.cinemaAddress}}</span></div></el-col>
+                    <el-col :span="4"><div class="grid-content"><el-button type="danger" round ><span v-on:click="buyTicket(cinema.cinemaCode)">选座购票</span></el-button></div></el-col>
+                </div>
+            </el-row>
+        </el-card>
+
+    </div>
+</div>
+
+</body>
+<script>
+    new Vue({
+        el : "#app",
+        data : {
+            film : {},
+            filmId : [[${filmId}]],
+            filmCode : [[${filmCode}]],
+            areas : [],
+            cinema4Areas : []
+        },
+        created : function () {
+            this.loadFilm();
+            this.listArea();
+            this.listCinema4Area(-1);
+        },
+        methods : {
+            loadFilm : function () {
+                var that = this;
+                axios.get('/film/showFilm/' + that.filmId).then(function (response) {
+                    that.film = response.data.data;
+                })
+            },
+            listArea : function () {
+                var that = this;
+                axios.get('/film/showAreaList').then(function( response ){
+                    that.areas = response.data.data;
+                })
+            },
+            listCinema4Area : function (areaId) {
+                var that = this;
+                axios.get('/film/listCinema4Area/' + that.filmId + '/' + areaId).then(function(response){
+                    that.cinema4Areas = response.data.data;
+                })
+            },
+            buyTicket : function (cinemaCode) {
+                var that = this;
+                var url = "/film/toChooseScene/" + cinemaCode + "/" + that.filmCode;
+                window.location.href = url;
+            }
+        }
+    });
+
+</script>
+
+</html>

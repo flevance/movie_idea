@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>选择电影场次</title>
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+
+    <style>
+        .el-row {
+            margin-bottom: 20px;
+        &:last-child {
+             margin-bottom: 0;
+         }
+        }
+        .el-col {
+            border-radius: 4px;
+        }
+        .bg-purple-dark {
+            background: #99a9bf;
+        }
+        .bg-purple {
+            background: #d3dce6;
+        }
+        .bg-purple-light {
+            background: #e5e9f2;
+        }
+        .grid-content {
+            border-radius: 4px;
+            min-height: 36px;
+        }
+        .row-bg {
+            padding: 10px 0;
+            background-color: #f9fafc;
+        }
+
+    </style>
+
+</head>
+<body>
+    <div id="app">
+        <el-row>
+            <div>
+                <el-col :span="4">
+                    <div class="grid-conten">
+                        <img :src="'/picture/cinema/' + cinemaCode" style="width: 200px ;height: 300px" >
+                    </div>
+                </el-col>
+                <el-col :span="6">
+                    <el-row>
+                        <el-col :span="12"><div class="grid-content">{{cinema.cinemaName}}</div></el-col>
+                    </el-row>
+                    <el-row>
+                        <el-col :span="12"><div class="grid-content">{{cinema.cinemaAddress}}</div></el-col>
+                    </el-row>
+                    <el-row>
+                        <el-col :span="12"><div class="grid-content">{{cinema.cinemaPhone}}</div></el-col>
+                    </el-row>
+                </el-col>
+            </div>
+        </el-row>
+        <el-divider></el-divider>
+
+        <div style="width: 800px;height: 300px">
+            <template>
+                <el-carousel :interval="4000" type="card" height="500px"
+                             :autoplay="false" :loop="false"
+                             :initial-index="currentFilmIndex" @change="changeFilmHandler">
+                    <el-carousel-item v-for="film in films" >
+                        <img :src="'/picture/film/' + film.filmPic" style="width: 200px ;height: 300px">
+                    </el-carousel-item>
+                </el-carousel>
+            </template>
+        </div>
+
+        <el-divider></el-divider>
+        <el-row>
+            <el-col :span="24">
+                <el-col :span="12"><div class="grid-content">{{film.filmName}}</div></el-col>
+            </el-col>
+            <el-col :span="24">
+                <el-col :span="6"><div class="grid-content">放映时长: {{film.filmTime}}</div></el-col>
+                <el-col :span="6"><div class="grid-content">类型: {{film.filmType}}</div></el-col>
+            </el-col>
+        </el-row>
+        <el-divider></el-divider>
+        <template>
+            <el-table
+                    :data="showTime"
+                    style="width: 100%">
+                <el-table-column
+                        prop="showTime"
+                        label="放映时间"
+                        width="180">
+                    <template slot-scope="scope">
+                        {{scope.row.showTime}}
+                    </template>
+                </el-table-column>
+                <el-table-column
+                        prop="filmLanguage"
+                        label="语言版本"
+                        width="180">
+                </el-table-column>
+                <el-table-column
+                        prop="hall"
+                        label="放映厅"
+                        width="180">
+                </el-table-column>
+                <el-table-column
+                        prop="price"
+                        label="售价"
+                        width="180">
+                </el-table-column>
+                <el-table-column
+                        prop="action"
+                        label="选座购票"
+                        width="180">
+                    <template slot-scope="scope">
+                        <el-button type="danger" round v-on:click="selectAndBuy(scope.row.id)">选座购票</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </template>
+    </div>
+
+</body>
+
+<script>
+    new Vue({
+        el : '#app',
+        data : {
+            cinemaCode : [[${cinemaCode}]],
+            filmCode : [[${filmCode}]],
+            cinema : {},
+            film : {},
+            showTime : [],
+            films : [],
+            currentFilmIndex : ""
+        },
+        created : function () {
+            this.selectCinema();
+            this.selectFilmByFilmCode();
+            this.listFilmCodeByCinemaCode();
+            this.listShowTime(this.cinemaCode,this.filmCode);
+        },
+        methods : {
+            selectCinema : function () {
+                var that = this;
+                axios.get("/film/selectCinema/" + that.cinemaCode).then(function(response){
+                    that.cinema = response.data.data;
+                })
+            },
+            selectFilmByFilmCode : function () {
+                var that = this;
+                axios.get("/film/selectFilmByFilmCode/" + that.filmCode).then(function(response){
+                    that.film = response.data.data;
+                })
+            },
+            listShowTime : function (cinemaCode,filmCode) {
+                var that = this;
+                axios.get("/film/listShowTime/" + cinemaCode + "/" + filmCode).then(function(response){
+                    that.showTime = response.data.data;
+                })
+            },
+            changeFilmHandler :function(x,y){
+                console.log(x + "  " + y);
+                this.currentFilmIndex = x;
+                var f = this.films[x].filmCode;
+                this.filmCode = f;
+                this.selectFilmByFilmCode();
+                this.listShowTime(this.cinemaCode,f);
+
+            },
+            selectAndBuy : function (id) {
+                var url = "/film/toChooseTicket/" + id;
+                window.location.href = url;
+            },
+            listFilmCodeByCinemaCode : function () {
+                var that = this;
+                axios.get("/film/listFilmCodeByCinemaCode/" + that.cinemaCode).then(function(response){
+                    that.films = response.data.data;
+                    that.currentFilm();
+                })
+            },
+            currentFilm : function () {
+                for (var i = 0;i<this.films.length;i++){
+                    var f = this.films[i].filmCode;
+                    if (this.filmCode == f){
+                        this.currentFilmIndex = i;
+                        return;
+                    }
+                }
+            }
+
+        }
+    })
+</script>
+</html>

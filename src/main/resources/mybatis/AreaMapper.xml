@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dayuanit.movie.movie.mapper.AreaMapper">
+  <resultMap id="BaseResultMap" type="com.dayuanit.movie.movie.entity.Area">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="area_name" jdbcType="VARCHAR" property="areaName" />
+    <result column="area_id" jdbcType="INTEGER" property="areaId" />
+    <result column="city_code" jdbcType="INTEGER" property="cityCode" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, area_name, area_id, city_code
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from spider_area
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from spider_area
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.dayuanit.movie.movie.entity.Area">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into spider_area (area_name, area_id, city_code
+      )
+    values (#{areaName,jdbcType=VARCHAR}, #{areaId,jdbcType=INTEGER}, #{cityCode,jdbcType=INTEGER}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.dayuanit.movie.movie.entity.Area">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into spider_area
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="areaName != null">
+        area_name,
+      </if>
+      <if test="areaId != null">
+        area_id,
+      </if>
+      <if test="cityCode != null">
+        city_code,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="areaName != null">
+        #{areaName,jdbcType=VARCHAR},
+      </if>
+      <if test="areaId != null">
+        #{areaId,jdbcType=INTEGER},
+      </if>
+      <if test="cityCode != null">
+        #{cityCode,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.dayuanit.movie.movie.entity.Area">
+    update spider_area
+    <set>
+      <if test="areaName != null">
+        area_name = #{areaName,jdbcType=VARCHAR},
+      </if>
+      <if test="areaId != null">
+        area_id = #{areaId,jdbcType=INTEGER},
+      </if>
+      <if test="cityCode != null">
+        city_code = #{cityCode,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.dayuanit.movie.movie.entity.Area">
+    update spider_area
+    set area_name = #{areaName,jdbcType=VARCHAR},
+      area_id = #{areaId,jdbcType=INTEGER},
+      city_code = #{cityCode,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <select id="selectAreaList" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List"/>
+    from spider.spider_area
+  </select>
+
+
+  <select id="selectAreaByAreaId" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List"/>
+    from spider_area
+    where spider.spider_area.area_id = #{areaId}
+  </select>
+</mapper>

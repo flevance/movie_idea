@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>结算页面</title>
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+
+    <style>
+        .el-row {
+            margin-bottom: 20px;
+        &:last-child {
+             margin-bottom: 0;
+         }
+        }
+        .el-col {
+            border-radius: 4px;
+        }
+        .bg-purple-dark {
+            background: #99a9bf;
+        }
+        .bg-purple {
+            background: #d3dce6;
+        }
+        .bg-purple-light {
+            background: #e5e9f2;
+        }
+        .grid-content {
+            border-radius: 4px;
+            min-height: 36px;
+        }
+        .row-bg {
+            padding: 10px 0;
+            background-color: #f9fafc;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div id="payFormDiv"  v-html="payForm"></div>
+        <div>
+            <el-row>
+                <div>
+                    <el-col :span="4">
+                        <div class="grid-conten">
+                            <img :src="'/picture/cinema/' + cinemaCode" style="width: 200px ;height: 300px" >
+                        </div>
+                    </el-col>
+                    <el-col :span="6">
+                        <el-row>
+                            <el-col :span="12"><div class="grid-content">{{cinema.cinemaName}}</div></el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="12"><div class="grid-content">{{cinema.cinemaAddress}}</div></el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="12"><div class="grid-content">{{cinema.cinemaPhone}}</div></el-col>
+                        </el-row>
+                    </el-col>
+                </div>
+            </el-row>
+
+            <el-divider></el-divider>
+
+            <el-row>
+                <div>
+                    <el-col :span="4">
+                        <div class="grid-conten">
+                            <img :src="'/picture/film/' + film.filmPic" style="width: 200px ;height: 300px" >
+                        </div>
+                    </el-col>
+                    <el-col :span="20">
+                        <el-row>
+                            <el-col :span="2"><div class="grid-content">电影:</div></el-col>
+                            <el-col :span="16"><div class="grid-content">{{film.filmName}}</div></el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="2"><div class="grid-content">电影类型:</div></el-col>
+                            <el-col :span="16"><div class="grid-content">{{film.filmType}}</div></el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="2"><div class="grid-content">电影时长:</div></el-col>
+                            <el-col :span="16"><div class="grid-content">{{film.filmTime}}</div></el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="2"><div class="grid-content">放映时长:</div></el-col>
+                            <el-col :span="16"><div class="grid-content">{{film.filmShowTime}}</div></el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="2"><div class="grid-content">已选择座位:</div></el-col>
+                            <el-col :span="16"><div class="grid-content">{{chooseSeats}}</div></el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="2"><div class="grid-content">总计支付:</div></el-col>
+                            <el-col :span="16"><div class="grid-content">￥{{chooseSeats}}</div></el-col>
+                        </el-row>
+                        <el-row>
+                            <el-button type="danger" round @click="toPay()">支付结算</el-button>
+                        </el-row>
+
+                    </el-col>
+                </div>
+            </el-row>
+
+            <el-divider></el-divider>
+
+
+
+
+        </div>
+    </div>
+
+
+</body>
+    <script>
+        new Vue({
+            el : "#app",
+            data : {
+                filmCode : [[${filmCode}]],
+                cinemaCode : [[${cinemaCode}]],
+                filmScheduleId : [[${filmScheduleId}]],
+                film : {},
+                cinema : {},
+                chooseSeats : '[[${chooseSeats}]]',
+                payForm : ''
+            },
+            created : function (){
+                this.loadFilm();
+                this.loadCinema();
+            },
+            methods : {
+                loadFilm : function () {
+                    var that = this;
+                    axios.get('/film/selectFilmByFilmCode/' + that.filmCode).then(function (response) {
+                        that.film = response.data.data;
+                    })
+                },
+                loadCinema : function () {
+                    var that = this;
+                    axios.get('/film/selectCinema/' + that.cinemaCode).then(function (response) {
+                        that.cinema = response.data.data;
+                    })
+                },
+                toPay : function () {
+                    var that = this;
+                    axios.get('/film/toPay/' + this.filmCode + '/' + this.cinemaCode + '/' + this.filmScheduleId + "/" +this.chooseSeats).then(function(response){
+                        that.payForm = response.data.data;
+                        Vue.nextTick(function(){
+                            window.document.forms[0].submit();
+                        })
+                    })
+                }
+            }
+        })
+    </script>
+</html>
