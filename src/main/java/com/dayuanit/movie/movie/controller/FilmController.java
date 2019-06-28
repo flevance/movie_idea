@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.List;
@@ -53,18 +54,15 @@ public class FilmController extends BaseController {
     @RequestMapping(value = "/picture/film/{filmName}" ,method = RequestMethod.GET)
     public void showFilmPic(@PathVariable String filmName, HttpServletResponse response){
         response.setContentType("image/png");
-        URL resource = FilmController.class.getClassLoader().getResource("static");
-
-        //URL systemResource = ClassLoader.getSystemResource("application.properties");
-        System.out.println("?????????????????" + resource);
-        String url = resource.getPath();
+//        URL resource = FilmController.class.getClassLoader().getResource("static");
+//        String url = resource.getPath();
         ///Users/liu/Java_Study/spider/temp
-        try (FileInputStream fis = new FileInputStream(url  + "/images/picture/film/" + filmName);
+        try (InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream("static/images/picture/film/" + filmName);
              OutputStream os = response.getOutputStream()) {
-            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>"+ url);
+            //System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>"+ url);
             byte[] buff = new byte[1024];
             int length = -1;
-            while (-1 != (length = fis.read(buff))){
+            while (-1 != (length = resourceAsStream.read(buff))){
                 os.write(buff,0,length);
                 os.flush();
             }
@@ -76,8 +74,8 @@ public class FilmController extends BaseController {
     @RequestMapping(value = "/picture/actor/{filmPic}" ,method = RequestMethod.GET)
     public void showActorPic(@PathVariable String filmPic, HttpServletResponse response){
         response.setContentType("image/png");
-        URL systemResource = ClassLoader.getSystemResource("static");
-        String url = systemResource.getPath();
+        URL resource = FilmController.class.getClassLoader().getResource("static");
+        String url = resource.getPath();
         try (FileInputStream fis = new FileInputStream(url + "/images/picture/actor/" + filmPic);
              OutputStream os = response.getOutputStream()) {
             byte[] buff = new byte[1024];
@@ -94,8 +92,8 @@ public class FilmController extends BaseController {
     @RequestMapping(value = "/picture/cinema/{cinemaCode}" ,method = RequestMethod.GET)
     public void showCinemaPic(@PathVariable String cinemaCode, HttpServletResponse response){
         response.setContentType("image/png");
-        URL systemResource = ClassLoader.getSystemResource("static");
-        String url = systemResource.getPath();
+        URL resource = FilmController.class.getClassLoader().getResource("static");
+        String url = resource.getPath();
         try (FileInputStream fis = new FileInputStream(url  + "/images/picture/cinema/" + cinemaCode);
              OutputStream os = response.getOutputStream()) {
             byte[] buff = new byte[1024];
