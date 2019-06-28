@@ -74,13 +74,11 @@ public class FilmController extends BaseController {
     @RequestMapping(value = "/picture/actor/{filmPic}" ,method = RequestMethod.GET)
     public void showActorPic(@PathVariable String filmPic, HttpServletResponse response){
         response.setContentType("image/png");
-        URL resource = FilmController.class.getClassLoader().getResource("static");
-        String url = resource.getPath();
-        try (FileInputStream fis = new FileInputStream(url + "/images/picture/actor/" + filmPic);
+        try (InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream("static/images/picture/actor/" + filmPic);
              OutputStream os = response.getOutputStream()) {
             byte[] buff = new byte[1024];
             int length = -1;
-            while (-1 != (length = fis.read(buff))){
+            while (-1 != (length = resourceAsStream.read(buff))){
                 os.write(buff,0,length);
                 os.flush();
             }
@@ -92,13 +90,11 @@ public class FilmController extends BaseController {
     @RequestMapping(value = "/picture/cinema/{cinemaCode}" ,method = RequestMethod.GET)
     public void showCinemaPic(@PathVariable String cinemaCode, HttpServletResponse response){
         response.setContentType("image/png");
-        URL resource = FilmController.class.getClassLoader().getResource("static");
-        String url = resource.getPath();
-        try (FileInputStream fis = new FileInputStream(url  + "/images/picture/cinema/" + cinemaCode);
+        try (InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream("static/images/picture/cinema/" + cinemaCode);
              OutputStream os = response.getOutputStream()) {
             byte[] buff = new byte[1024];
             int length = -1;
-            while (-1 != (length = fis.read(buff))){
+            while (-1 != (length = resourceAsStream.read(buff))){
                 os.write(buff,0,length);
                 os.flush();
             }
